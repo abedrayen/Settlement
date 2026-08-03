@@ -414,7 +414,7 @@ class AgentOrchestrator:
                 tool_calls.append({"tool": "frontier_analysis", "input": {"min_p_fulfill": min_pf, "max_rr": max_rr}, "output": result.get("data") or result, "duration_ms": result.get("duration_ms", 0)})
                 yield {"type": "tool_done", "tool": "frontier_analysis", "output": result.get("data") or result}
                 if result.get("error"):
-                    draft = f"Frontier simulation failed: {result['error']}"
+                    draft = f"Frontier analysis failed: {result['error']}"
                 else:
                     draft = self._format_frontier(result.get("data", {}))
             polished = await self._conversational_reply(message, history, role, {"tool_data": draft}, intent)
@@ -903,11 +903,11 @@ class AgentOrchestrator:
         lines = ["Efficient Frontier:\n"]
         for f in data.get("frontier", []):
             lines.append(f"- {f['strategy_name']}: EV £{f['portfolio_ev']:,.0f}, Risk {f['risk_level']}")
-        sim = data.get("simulation", {})
-        if sim:
+        opt = data.get("optimization") or data.get("simulation") or {}
+        if opt:
             lines.append(
-                f"\nScenario (MILP): Portfolio EV {sim.get('baseline_portfolio_ev')} → {sim.get('constrained_portfolio_ev')} "
-                f"({sim.get('ev_change_percent')}%) | solver {sim.get('solver_status')}"
+                f"\nPortfolio optimization (MILP): EV {opt.get('baseline_portfolio_ev')} → {opt.get('constrained_portfolio_ev')} "
+                f"({opt.get('ev_change_percent')}%) | solver {opt.get('solver_status')}"
             )
         return "\n".join(lines)
 

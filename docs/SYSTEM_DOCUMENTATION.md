@@ -1,5 +1,8 @@
 # Settlement Portfolio AI Agent — System Documentation
 
+> **Canonical long-form reference:** [OPERATIONAL_ARCHITECTURE_AND_SYSTEM_DOCUMENTATION.md](./OPERATIONAL_ARCHITECTURE_AND_SYSTEM_DOCUMENTATION.md)  
+> Use that document for enterprise-grade operational architecture, end-to-end workflows, RBAC, API catalog, and the operations runbook. This file remains a shorter as-built companion.
+
 This document describes the **Settlement Portfolio AI Agent MVP** as implemented in this repository. It is based strictly on the current code, configuration, and deployment setup — not on planned or aspirational features from the business specification alone.
 
 ---

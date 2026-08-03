@@ -178,11 +178,11 @@ class ToolService:
         start = time.perf_counter()
         frontier = await self.frontier_repo.get_frontier()
         try:
-            simulation = await self.frontier_repo.simulate_constraint(min_p_fulfill, max_rr)
+            optimization = await self.frontier_repo.optimize_under_constraints(min_p_fulfill, max_rr)
         except ValueError as exc:
             return {"error": str(exc), "duration_ms": int((time.perf_counter() - start) * 1000)}
         return {
-            "data": {"frontier": frontier, "simulation": simulation},
+            "data": {"frontier": frontier, "optimization": optimization},
             "duration_ms": int((time.perf_counter() - start) * 1000),
         }
 

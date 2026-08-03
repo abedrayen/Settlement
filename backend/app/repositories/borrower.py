@@ -548,7 +548,7 @@ class FrontierRepository:
             for r in rows
         ]
 
-    async def simulate_constraint(
+    async def optimize_under_constraints(
         self, min_p_fulfill: float | None = None, max_rr: float | None = None
     ) -> dict[str, Any]:
         from app.services.optimizer import OptimizerError, optimize_portfolio
