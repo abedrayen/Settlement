@@ -8,7 +8,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.rbac import CurrentUser, get_current_user
+from app.auth.rbac import CurrentUser, get_current_user, normalize_role
 from app.auth.security import create_access_token, verify_password
 from app.database import get_db
 from app.models.entities import AppUser
@@ -39,7 +39,7 @@ def _user_out(user: AppUser) -> UserOut:
         id=str(user.id),
         email=user.email,
         full_name=user.full_name,
-        role=user.role,
+        role=normalize_role(user.role),
     )
 
 
@@ -51,7 +51,8 @@ async def login(body: LoginRequest, db: AsyncSession = Depends(get_db)) -> Login
     if user is None or not user.is_active or not verify_password(body.password, user.hashed_password):
         raise HTTPException(401, "Invalid email or password")
 
-    token = create_access_token(user_id=user.id, email=user.email, role=user.role)
+    role = normalize_role(user.role)
+    token = create_access_token(user_id=user.id, email=user.email, role=role)
     return LoginResponse(access_token=token, user=_user_out(user))
 
 

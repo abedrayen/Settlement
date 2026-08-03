@@ -13,7 +13,7 @@
     "rr_bound_proximity": 0.05,
     "high_risk_queue": "manager_approval",
     "medium_risk_queue": "manager_approval",
-    "compliance_queue": "compliance_review",
+    "compliance_queue": "manager_approval",
     "specialist_queues": {
       "FlagDeceased": "deceased_escalation",
       "FlagLegalEntity": "corporate_collections",

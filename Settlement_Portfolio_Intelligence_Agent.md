@@ -7,7 +7,7 @@
 > - `[~]` **Partial** — present as demo/simulation, seeded data, or incomplete vs production intent
 > - `[ ]` **Not started** — missing from the codebase
 >
-> **MVP verdict:** End-to-end demo with **PuLP MILP** offer/portfolio optimization, **simulated ModelScorer (T5)**, expanded chat intents (name+code identity), and HITL approval workflows. Live `.pkl` models, parquet ETL, SSO, and multi-channel remain out of scope. See `docs/SYSTEM_DOCUMENTATION.md`.
+> **MVP verdict:** End-to-end demo with **PuLP MILP** offer/portfolio optimization, **simulated ModelScorer (T5)**, six-view IA (Collection Workspace → Executive Dashboard), three roles (analyst / manager / admin), and HITL approval workflows. Live `.pkl` models, parquet ETL, SSO, and multi-channel remain out of scope. See `docs/SYSTEM_DOCUMENTATION.md`.
 
 | Area | Done | Partial | Not started |
 |---|---|---|---|
@@ -20,12 +20,12 @@
 | 7. Component responsibilities | 3 | 6 | 0 |
 | 8. Conversational intents | 7 | 2 | 0 |
 | 9. HITL / governance | 7 | 3 | 1 |
-| 10. Roles, KPIs & dashboards | 2 | 3 | 0 |
+| 10. Roles, KPIs & dashboards | 5 | 0 | 0 |
 
 ---
 
 ## 1. Business Objectives
-- [x] Conversational AI agent for collections analysts, portfolio managers, and senior stakeholders — *SSE chat + 5 JWT roles*
+- [x] Conversational AI agent for collections analysts, portfolio managers, and senior stakeholders — *SSE chat + 3 JWT roles (analyst/manager/admin)*
 - [~] Instant, model-grounded answers about the settlement portfolio — *simulated scorer + seeded SHAP/grid; not live `.pkl`*
 - [x] Replace ad-hoc notebook/Excel runs with natural-language interface — *demo NL interface exists*
 - [ ] Backed by live modelling infrastructure
@@ -162,18 +162,20 @@
 
 ## 10. Roles, KPIs & Dashboards
 
-**Manager (Operational)**
-- [~] KPIs: approval rate, escalation volume/day, SLA compliance, policy exception rate, agent performance score, avg resolution time/case — *workflows inbox supports ops review; checklist KPIs not fully instrumented*
-- [x] Dashboard: pending approvals queue, escalated cases w/ reason — *`/workflows` with Approve/Reject/Escalate; Documents/Monitoring in nav*
+**Roles (three):** Collection Analyst (`analyst`), Operational Manager (`manager`), Admin (`admin`). Legacy `stakeholder` / `compliance` map to manager.
 
-**Upper Management (Strategic)**
-- [~] KPIs: total recovery rate, automation rate, cost per case, portfolio risk distribution, … — *portfolio EV/realization/segments; most exec KPIs absent*
-- [~] Executive Dashboard: partial via `/portfolio` + `/strategy`
+**Manager (Operational)**
+- [x] KPIs: approval rate, escalation volume, SLA breaches, avg resolution time — *`GET /api/workflows/kpis` + Approvals header*
+- [x] Dashboard: pending / escalated / resolved queues — *`/approvals`*
+
+**Upper Management (Strategic)** — view for manager + admin (no separate Executive login)
+- [x] KPIs: recovery rate, automation ratio, portfolio exposure, EV impact, risk distribution, bottlenecks, policy effectiveness, forecast — *`GET /api/executive/kpis` + `/executive`*
+- [x] Executive Dashboard: `/executive`
 
 **Decision-making split**
 - [x] AI Agent → executes conversation + gathers data (name + code)
-- [x] Manager → validates operations + handles exceptions — *approval actions in Workflows*
-- [~] Executive → monitors strategy + optimizes system performance — *stakeholder role + portfolio/strategy views*
+- [x] Manager → validates operations + handles exceptions — *approval actions in Approvals*
+- [x] Executive view → monitors strategy — *manager/admin Executive Dashboard*
 
 ---
 
@@ -186,6 +188,6 @@
 | PuLP MILP T2 | `backend/app/services/optimizer.py` (single + portfolio) |
 | Approval tree | `backend/content/guardrail_config.json`, `GuardrailEngine.classify_decision` |
 | Name + code chat | `AgentOrchestrator._resolve_borrower` |
-| HITL UI | `/workflows` Approve/Reject/Escalate; sidebar Workflows/Documents/Monitoring |
+| HITL UI | `/approvals` Approve/Reject/Escalate; six-view nav + secondary Documents/Model Health |
 
 Want this exported as a Word or Excel checklist/tracker (with owner/status columns) instead of inline markdown?

@@ -32,7 +32,7 @@ const AuthContext = createContext<AuthContextValue>({
     throw new Error("AuthProvider missing");
   },
   logout: () => {},
-  homePath: "/chat",
+  homePath: "/workspace",
 });
 
 export function AuthProvider({ children }: { children: ReactNode }) {

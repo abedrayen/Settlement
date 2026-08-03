@@ -33,7 +33,7 @@ export default function MonitoringPage() {
   return (
     <div className="page-container">
       <PageHeader
-        title="Model Monitoring"
+        title="Model Health"
         badge={alerts.length > 0 ? <Badge variant="danger">{alerts.length} alerts</Badge> : <Badge variant="success">Healthy</Badge>}
       />
 

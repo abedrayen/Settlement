@@ -15,7 +15,7 @@ export function WorkflowBanner({ workflow }: { workflow: WorkflowData }) {
       variant={variant}
       title={title}
       action={
-        <Link href="/workflows">
+        <Link href="/approvals">
           <Button variant="outline" size="sm">
             View Workflows
           </Button>

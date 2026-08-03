@@ -19,7 +19,7 @@ from app.rag.service import RAGService
 
 router = APIRouter(tags=["agent"])
 
-APPROVER_ROLES = {"manager", "compliance", "admin"}
+APPROVER_ROLES = {"manager", "admin"}
 APPROVAL_STATUSES = {"approved", "rejected", "escalated"}
 
 
@@ -87,7 +87,7 @@ async def document_query(
     role: str = Depends(get_role),
     db: AsyncSession = Depends(get_db),
 ) -> dict[str, Any]:
-    require_permission(role, "chat")
+    require_permission(role, "documents_read")
     rag = RAGService(db)
     result = await rag.answer(body.question)
     return result
@@ -150,6 +150,48 @@ async def list_workflows(
     return [_workflow_dict(r) for r in rows]
 
 
+@router.get("/api/workflows/kpis")
+async def workflow_kpis(
+    role: str = Depends(get_role),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    require_permission(role, "workflows")
+    rows = (await db.execute(select(WorkflowTask))).scalars().all()
+    total = len(rows)
+    pending = sum(1 for r in rows if r.status == "pending_approval")
+    escalated = sum(1 for r in rows if r.status == "escalated")
+    approved = sum(1 for r in rows if r.status == "approved")
+    rejected = sum(1 for r in rows if r.status == "rejected")
+    decided = approved + rejected
+    approval_rate = round(approved / decided, 4) if decided else 0.0
+
+    resolution_hours: list[float] = []
+    sla_breaches = 0
+    sla_hours = 48.0
+    now = datetime.utcnow()
+    for r in rows:
+        if r.created_at and r.updated_at and r.status in APPROVAL_STATUSES | {"resolved", "acknowledged"}:
+            delta = (r.updated_at - r.created_at).total_seconds() / 3600.0
+            resolution_hours.append(delta)
+        if r.status in {"open", "pending_approval", "escalated"} and r.created_at:
+            age_h = (now - r.created_at).total_seconds() / 3600.0
+            if age_h > sla_hours:
+                sla_breaches += 1
+
+    avg_resolution_hours = round(sum(resolution_hours) / len(resolution_hours), 2) if resolution_hours else 0.0
+    return {
+        "total": total,
+        "pending_approval": pending,
+        "escalated": escalated,
+        "approved": approved,
+        "rejected": rejected,
+        "approval_rate": approval_rate,
+        "avg_resolution_hours": avg_resolution_hours,
+        "sla_breaches": sla_breaches,
+        "sla_hours": sla_hours,
+    }
+
+
 @router.patch("/api/workflows/{task_id}")
 async def update_workflow(
     task_id: str,
@@ -165,7 +207,7 @@ async def update_workflow(
 
     new_status = body.status
     if new_status in APPROVAL_STATUSES and normalize_role(role) not in APPROVER_ROLES:
-        raise HTTPException(403, "Only manager, compliance, or admin can approve/reject/escalate")
+        raise HTTPException(403, "Only manager or admin can approve/reject/escalate")
 
     task.status = new_status
     task.updated_at = datetime.utcnow()

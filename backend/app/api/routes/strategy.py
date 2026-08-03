@@ -27,12 +27,7 @@ async def frontier(
 
 @router.get("/monitoring")
 async def monitoring(role: str = Depends(get_role), db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
-    from app.auth.rbac import ROLE_PERMISSIONS, normalize_role
-
-    r = normalize_role(role)
-    perms = ROLE_PERMISSIONS.get(r, set())
-    if "portfolio_read" not in perms and "strategy_read" not in perms:
-        require_permission(role, "portfolio_read")
+    require_permission(role, "monitoring_read")
     tools = ToolService(db)
     result = await tools.monitoring()
     return result.get("data", {})

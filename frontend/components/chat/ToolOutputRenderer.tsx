@@ -171,7 +171,7 @@ function InstallmentComparisonOutput({ data }: { data: ComparisonRow[] }) {
         cells: {
           rank: i + 1,
           customer: (
-            <Link href={`/borrowers/${row.customer_code}`} className="text-blue-600 hover:underline font-medium">
+            <Link href={`/workspace/${row.customer_code}`} className="text-blue-600 hover:underline font-medium">
               {row.customer_code}
             </Link>
           ),
@@ -256,7 +256,7 @@ function BorrowerLookupOutput({ data }: { data: Record<string, unknown> }) {
       <div className="flex items-center justify-between mb-3">
         <p className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Borrower Profile</p>
         {customerCode && (
-          <Link href={`/borrowers/${customerCode}`} className="text-xs text-blue-600 hover:underline">
+          <Link href={`/workspace/${customerCode}`} className="text-xs text-blue-600 hover:underline">
             Full details →
           </Link>
         )}

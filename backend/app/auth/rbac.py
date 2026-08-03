@@ -7,23 +7,51 @@ from uuid import UUID
 from fastapi import Depends, HTTPException
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-VALID_ROLES = {"analyst", "manager", "stakeholder", "compliance", "admin"}
+VALID_ROLES = {"analyst", "manager", "admin"}
+
+# Legacy roles map onto manager (Operational Manager absorbs stakeholder/compliance).
+_LEGACY_ROLE_MAP = {
+    "stakeholder": "manager",
+    "compliance": "manager",
+    "executive": "manager",
+}
 
 ROLE_PERMISSIONS: dict[str, set[str]] = {
-    "analyst": {"chat", "borrower", "strategy_read", "workflows"},
-    "manager": {"chat", "borrower", "portfolio_read", "strategy_run", "workflows", "audit_read"},
-    "stakeholder": {"chat", "borrower", "strategy_read", "audit_read"},
-    "compliance": {"chat", "borrower", "strategy_read", "audit_read", "audit_export", "workflows"},
+    "analyst": {
+        "chat",
+        "borrower",
+        "strategy_read",
+        "documents_read",
+    },
+    "manager": {
+        "chat",
+        "borrower",
+        "portfolio_read",
+        "strategy_read",
+        "strategy_run",
+        "workflows",
+        "workflows_approve",
+        "audit_read",
+        "audit_export",
+        "documents_read",
+        "executive_read",
+        "monitoring_read",
+    },
     "admin": {
         "chat",
         "borrower",
         "portfolio_read",
+        "strategy_read",
         "strategy_run",
         "workflows",
+        "workflows_approve",
         "audit_read",
         "audit_export",
         "settings_read",
         "settings_write",
+        "documents_read",
+        "executive_read",
+        "monitoring_read",
     },
 }
 
@@ -40,8 +68,7 @@ class CurrentUser:
 
 def normalize_role(role: str | None) -> str:
     r = (role or "analyst").lower()
-    if r == "executive":
-        return "stakeholder"
+    r = _LEGACY_ROLE_MAP.get(r, r)
     return r if r in VALID_ROLES else "analyst"
 
 

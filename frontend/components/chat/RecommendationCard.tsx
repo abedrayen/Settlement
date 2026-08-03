@@ -65,7 +65,7 @@ export function RecommendationCard({ data }: { data: Record<string, unknown> }) 
           {data.optimizer ? ` (${String(data.optimizer)})` : ""}
         </span>
         {customerCode && (
-          <Link href={`/borrowers/${customerCode}`} className="text-emerald-700 underline">
+          <Link href={`/workspace/${customerCode}`} className="text-emerald-700 underline">
             View borrower →
           </Link>
         )}

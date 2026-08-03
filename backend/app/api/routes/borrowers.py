@@ -27,6 +27,10 @@ class ScoreRequest(BaseModel):
     rescore_grid: bool = False
 
 
+class SubmitApprovalRequest(BaseModel):
+    reason: str | None = None
+
+
 @router.get("")
 @router.get("/")
 async def list_borrowers(
@@ -81,6 +85,78 @@ async def get_borrower(
         "applications_summary": applications,
         "payments_summary": payments,
         "activities_summary": activities,
+    }
+
+
+@router.get("/{customer_code}/payments")
+async def get_payments(
+    customer_code: int,
+    role: str = Depends(get_role),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    require_permission(role, "borrower")
+    tools = ToolService(db)
+    result = await tools.payment_history(customer_code)
+    if result.get("error"):
+        raise HTTPException(404, result["error"])
+    return result.get("data", {})
+
+
+@router.post("/{customer_code}/submit-approval")
+async def submit_approval(
+    customer_code: int,
+    body: SubmitApprovalRequest | None = None,
+    role: str = Depends(get_role),
+    db: AsyncSession = Depends(get_db),
+) -> dict[str, Any]:
+    require_permission(role, "borrower")
+    repo = BorrowerRepository(db)
+    profile = await repo.get_by_customer_code(customer_code)
+    if not profile:
+        raise HTTPException(404, "Borrower not found")
+
+    guardrails = GuardrailEngine(db)
+    guard = await guardrails.evaluate(customer_code)
+    rec = profile.recommended or {}
+    legal_name = profile.customer.get("legal_name")
+    offer = {
+        "customer_code": customer_code,
+        "recovery_rate": rec.get("optimal_rr"),
+        "installments": rec.get("optimal_installments"),
+        "expected_value": rec.get("expected_value"),
+        "p_application": rec.get("p_application"),
+        "p_acceptance": rec.get("p_acceptance"),
+        "p_fulfillment": rec.get("p_fulfillment"),
+        "solver_status": rec.get("solver_status"),
+        "model_version": rec.get("model_version"),
+    }
+    decision = guardrails.classify_decision(guard, offer, legal_name=legal_name)
+    reason = (body.reason if body and body.reason else None) or decision.get("approval_reason") or "Manual submit for approval"
+    queue = decision.get("approver_queue") or "manager_approval"
+    payload = {
+        **offer,
+        "legal_name": legal_name,
+        "guardrail_status": guard.status,
+        "guardrail_reason": guard.reason,
+        "within_limits": decision.get("within_limits"),
+        "customer_explanation": decision.get("customer_explanation"),
+        "approval_reason": decision.get("approval_reason"),
+    }
+    task = await guardrails.create_approval_task(
+        customer_code=customer_code,
+        settlement_code=profile.settlement_code,
+        queue=queue,
+        reason=str(reason)[:100],
+        risk_tier=str(decision.get("risk_tier") or guard.risk_tier or "medium"),
+        decision_payload=payload,
+    )
+    return {
+        "task_id": str(task.task_id),
+        "status": task.status,
+        "assigned_queue": task.assigned_queue,
+        "risk_tier": task.risk_tier,
+        "reason": task.reason,
+        "decision_payload": payload,
     }
 
 

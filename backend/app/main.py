@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 
-from app.api.routes import agent, audit, auth, borrowers, dashboard, jobs, portfolio, strategy
+from app.api.routes import agent, audit, auth, borrowers, dashboard, executive, jobs, portfolio, strategy
 from app.api.routes import settings as settings_routes
 from app.config import settings
 from app.database import AsyncSessionLocal
@@ -84,6 +84,7 @@ app.include_router(agent.router)
 app.include_router(borrowers.router)
 app.include_router(portfolio.router)
 app.include_router(strategy.router)
+app.include_router(executive.router)
 app.include_router(audit.router)
 app.include_router(settings_routes.router)
 app.include_router(jobs.router)

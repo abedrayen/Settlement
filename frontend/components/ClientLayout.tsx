@@ -14,7 +14,7 @@ export function ClientLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const { loading, isAuthenticated, role, homePath } = useAuth();
   const isLogin = pathname === "/login";
-  const isChatFocus = pathname === "/chat";
+  const isChatFocus = pathname === "/assistant" || pathname === "/chat";
 
   useEffect(() => {
     if (loading || isLogin) return;

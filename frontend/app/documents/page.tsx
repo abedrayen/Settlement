@@ -42,7 +42,7 @@ export default function DocumentsPage() {
       <PageHeader
         title="Document Intelligence"
         actions={
-          <Button variant="outline" size="sm" onClick={() => router.push(`/chat?q=${encodeURIComponent(question)}`)}>
+          <Button variant="outline" size="sm" onClick={() => router.push(`/assistant?q=${encodeURIComponent(question)}`)}>
             Ask in Chat
           </Button>
         }

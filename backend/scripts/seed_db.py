@@ -217,8 +217,6 @@ def grid_probs(customer_code: int, rr: float, inst: int) -> tuple[float, float, 
 SEED_USERS = [
     ("analyst@settlement.ai", "Alex Analyst", "analyst"),
     ("manager@settlement.ai", "Morgan Manager", "manager"),
-    ("stakeholder@settlement.ai", "Sam Stakeholder", "stakeholder"),
-    ("compliance@settlement.ai", "Casey Compliance", "compliance"),
     ("admin@settlement.ai", "Avery Admin", "admin"),
 ]
 SEED_PASSWORD = "Settlement1!"
@@ -266,6 +264,15 @@ async def seed_users(session: AsyncSession) -> None:
                     is_active=True,
                 )
             )
+    # Deactivate legacy roles removed from the three-role model
+    legacy_emails = ("stakeholder@settlement.ai", "compliance@settlement.ai")
+    for email in legacy_emails:
+        legacy = (
+            await session.execute(select(AppUser).where(AppUser.email == email))
+        ).scalar_one_or_none()
+        if legacy:
+            legacy.is_active = False
+            legacy.role = "manager"
     await session.commit()
     print(f"Seeded {len(SEED_USERS)} app users (password: {SEED_PASSWORD}).")
 

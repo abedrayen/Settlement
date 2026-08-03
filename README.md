@@ -28,25 +28,35 @@ Open http://localhost:3000/login. Seeded accounts (password for all: `Settlement
 
 | Email | Role |
 |-------|------|
-| `analyst@settlement.ai` | Collections Analyst |
-| `manager@settlement.ai` | Portfolio Manager |
-| `stakeholder@settlement.ai` | Senior Stakeholder |
-| `compliance@settlement.ai` | Compliance Reviewer |
+| `analyst@settlement.ai` | Collection Analyst |
+| `manager@settlement.ai` | Operational Manager |
 | `admin@settlement.ai` | Admin |
 
 Role is assigned from the user record (JWT). There is no client-side role switcher.
 
+### Navigation (six primary views)
+
+| View | Route | Roles |
+|------|-------|-------|
+| Collection Workspace | `/workspace` | Analyst, Manager, Admin |
+| Settlement Optimization | `/optimization` | Analyst, Manager, Admin |
+| Portfolio Monitoring | `/portfolio` | Manager, Admin |
+| Approvals & Exceptions | `/approvals` | Manager, Admin |
+| Executive Dashboard | `/executive` | Manager, Admin |
+| AI Assistant | `/assistant` | All |
+
+Secondary: Documents, Model Health, Audit, Settings (admin).
+
 ## Demo Script
 
 1. Open http://localhost:3000 and sign in as `analyst@settlement.ai`
-2. In **Agent**, ask using **name + code** (open **Borrowers** first to copy a legal name), e.g.  
+2. Open **Collection Workspace** — browse borrowers, open a profile, review payment history + offer grid
+3. Click **Submit for Approval** on a borrower, or ask the **AI Assistant**:  
    `Recommend a settlement for James Smith 243445`
-3. Try: `Payment history for James Smith (243445)` and `Rescore borrower James Smith 243445`
-4. Open **Borrowers** — browse the seeded list, filter by segment/status, open any customer profile
-5. Open **Portfolio** — verify KPIs, realisation trend, and segment chart
-6. Sign in as `manager@settlement.ai` → **Strategy** (frontier what-if) or ask:  
-   `Optimize portfolio with RR capped at 50%`
-7. Open **Workflows** — approve/reject/escalate pending recommendations (manager/compliance/admin)
+4. Try: `Payment history for James Smith (243445)` and `Rescore borrower James Smith 243445`
+5. Open **Settlement Optimization** — view frontier (analysts read-only for portfolio jobs)
+6. Sign in as `manager@settlement.ai` → **Approvals & Exceptions** — Approve/Reject/Escalate
+7. Open **Portfolio Monitoring** and **Executive Dashboard** — KPIs, heatmap, automation, bottlenecks
 8. In **Documents**, query: `What is the max recovery rate?` — expect 20–80% from policy
 
 Borrowers are always referred to as **`Legal Name (customer_code)`** in chat, cards, and workflows.
@@ -55,7 +65,7 @@ Borrowers are always referred to as **`Legal Name (customer_code)`** in chat, ca
 
 | Entity | Count |
 |--------|-------|
-| App users | 5 (one per role) |
+| App users | 3 (analyst, manager, admin) |
 | Customers | 100 (legal name + customer code) |
 | Settlements | 100 |
 | Accounts | ~150 |
@@ -73,7 +83,7 @@ See [content/mvp-mock-data-reference.md](content/mvp-mock-data-reference.md) for
 | T5 ModelScorer | Simulated deterministic rescoring (`POST /api/borrowers/{id}/score`) |
 | T2 OfferOptimiser | **PuLP CBC MILP** — single borrower + portfolio assignment |
 | Frontier what-if | Portfolio MILP under RR / P(fulfill) constraints |
-| Guardrails + HITL | Risk tiers, `pending_approval`, Approve/Reject/Escalate in **Workflows** |
+| Guardrails + HITL | Risk tiers, `pending_approval`, Approve/Reject/Escalate in **Approvals** |
 
 Live `.pkl` models and parquet ETL are **not** included — scores are simulated/seeded.
 
@@ -89,13 +99,17 @@ Protected routes require `Authorization: Bearer <access_token>` from `POST /api/
 | POST | `/api/chat/sync` | Agent chat (sync) |
 | GET | `/api/borrowers` | Borrower directory |
 | GET | `/api/borrowers/{id}` | Borrower profile |
+| GET | `/api/borrowers/{id}/payments` | Payment history |
+| POST | `/api/borrowers/{id}/submit-approval` | Create HITL approval task |
 | POST | `/api/borrowers/{id}/score` | On-demand simulated model score |
 | POST | `/api/borrowers/{id}/what-if` | Constrained MILP offer |
 | GET | `/api/portfolio/kpis` | Portfolio KPIs |
+| GET | `/api/executive/kpis` | Executive dashboard aggregates |
 | GET | `/api/frontier` | Efficient frontier + MILP constraint sim |
 | GET | `/api/monitoring` | Model health |
 | POST | `/api/documents/query` | RAG document Q&A |
 | GET | `/api/workflows` | Escalation / approval tasks |
+| GET | `/api/workflows/kpis` | Approval rate / SLA KPIs |
 | PATCH | `/api/workflows/{id}` | Acknowledge / approve / reject / escalate |
 | GET | `/api/audit/recommendations` | Audit trail |
 
@@ -149,3 +163,4 @@ npm run dev
 
 - [docs/SYSTEM_DOCUMENTATION.md](docs/SYSTEM_DOCUMENTATION.md) — as-built architecture
 - [Settlement_Portfolio_Intelligence_Agent.md](Settlement_Portfolio_Intelligence_Agent.md) — specification checklist (done / partial / not started)
+- [CURSOR_IMPLEMENTATION_GUIDE_Settlement_Portfolio_AI.md](CURSOR_IMPLEMENTATION_GUIDE_Settlement_Portfolio_AI.md) — six-view IA guide
