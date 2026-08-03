@@ -1,0 +1,28 @@
+{
+  "rr_min": 0.2,
+  "rr_max": 0.8,
+  "flags": {
+    "deceased_block": true,
+    "legal_entity_block": true,
+    "law_protection_block": true,
+    "vulnerability_warning": true,
+    "ood_warning": true
+  },
+  "approval": {
+    "ev_high_threshold": 5000,
+    "rr_bound_proximity": 0.05,
+    "high_risk_queue": "manager_approval",
+    "medium_risk_queue": "manager_approval",
+    "compliance_queue": "compliance_review",
+    "specialist_queues": {
+      "FlagDeceased": "deceased_escalation",
+      "FlagLegalEntity": "corporate_collections",
+      "FlagUnderLawProtection": "law_protection_review"
+    }
+  },
+  "optimizer": {
+    "max_avg_rr": null,
+    "max_installment_share": 0.6,
+    "high_installment_threshold": 3
+  }
+}

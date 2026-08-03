@@ -1,0 +1,1 @@
+docker compose exec backend python scripts/seed_db.py --force
