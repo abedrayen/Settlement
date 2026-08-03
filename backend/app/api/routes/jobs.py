@@ -20,7 +20,6 @@ _jobs: dict[str, dict[str, Any]] = {}
 async def _run_frontier_job(job_id: str, min_p_fulfill: float | None, max_rr: float | None, db_factory) -> None:
     _jobs[job_id]["status"] = "running"
     _jobs[job_id]["started_at"] = datetime.now(timezone.utc).isoformat()
-    await asyncio.sleep(2)
     async with db_factory() as db:
         tools = ToolService(db)
         result = await tools.frontier_analysis(min_p_fulfill, max_rr)

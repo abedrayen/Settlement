@@ -161,6 +161,7 @@ npm run dev
 
 ## Further reading
 
-- [docs/SYSTEM_DOCUMENTATION.md](docs/SYSTEM_DOCUMENTATION.md) — as-built architecture
+- [docs/OPERATIONAL_ARCHITECTURE_AND_SYSTEM_DOCUMENTATION.md](docs/OPERATIONAL_ARCHITECTURE_AND_SYSTEM_DOCUMENTATION.md) — **full operational architecture & system documentation** (end-to-end workflows, data flows, RBAC, APIs, runbook)
+- [docs/SYSTEM_DOCUMENTATION.md](docs/SYSTEM_DOCUMENTATION.md) — shorter as-built companion
 - [Settlement_Portfolio_Intelligence_Agent.md](Settlement_Portfolio_Intelligence_Agent.md) — specification checklist (done / partial / not started)
 - [CURSOR_IMPLEMENTATION_GUIDE_Settlement_Portfolio_AI.md](CURSOR_IMPLEMENTATION_GUIDE_Settlement_Portfolio_AI.md) — six-view IA guide

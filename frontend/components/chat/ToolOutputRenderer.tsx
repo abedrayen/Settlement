@@ -120,7 +120,7 @@ function MonitoringOutput({ data }: { data: Record<string, unknown> }) {
 
 function FrontierOutput({ data }: { data: Record<string, unknown> }) {
   const frontier = (data.frontier || []) as FrontierPoint[];
-  const sim = (data.simulation || {}) as Record<string, unknown>;
+  const opt = (data.optimization || data.simulation || {}) as Record<string, unknown>;
 
   return (
     <div className="space-y-3 max-w-2xl">
@@ -141,13 +141,14 @@ function FrontierOutput({ data }: { data: Record<string, unknown> }) {
         }))}
       />
 
-      {sim.baseline_portfolio_ev != null && (
+      {opt.baseline_portfolio_ev != null && (
         <div className="rounded-lg border border-blue-200 bg-blue-50/80 px-4 py-3 text-sm text-blue-900">
-          <p className="font-medium">Scenario Simulation</p>
+          <p className="font-medium">Portfolio optimization</p>
           <p className="mt-1 text-xs text-blue-800">
-            Portfolio EV {formatCurrency(Number(sim.baseline_portfolio_ev))} →{" "}
-            {formatCurrency(Number(sim.constrained_portfolio_ev))}
-            {sim.ev_change_percent != null && ` (${sim.ev_change_percent}% change)`}
+            Portfolio EV {formatCurrency(Number(opt.baseline_portfolio_ev))} →{" "}
+            {formatCurrency(Number(opt.constrained_portfolio_ev))}
+            {opt.ev_change_percent != null && ` (${opt.ev_change_percent}% change)`}
+            {opt.solver_status != null && ` · ${String(opt.solver_status)}`}
           </p>
         </div>
       )}

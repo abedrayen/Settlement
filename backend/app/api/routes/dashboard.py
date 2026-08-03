@@ -50,7 +50,7 @@ async def get_dashboard(db: AsyncSession = Depends(get_db)) -> dict[str, Any]:
         "kpis": portfolio.get("data", {}).get("kpis", {}),
         "segments": portfolio.get("data", {}).get("segments", []),
         "frontier": frontier.get("data", {}).get("frontier", []),
-        "simulation": frontier.get("data", {}).get("simulation", {}),
+        "optimization": frontier.get("data", {}).get("optimization", {}),
         "monitoring": monitoring.get("data", {}).get("metrics", []),
         "alerts": monitoring.get("data", {}).get("alerts", []),
         "sample_borrower": sample_borrower.get("data"),
